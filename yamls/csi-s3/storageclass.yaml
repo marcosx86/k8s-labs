@@ -1,0 +1,71 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: csi-s3-rclone
+provisioner: ch.ctrox.csi.s3-driver
+parameters:
+  # specify which mounter to use
+  # can be set to rclone, s3fs, goofys or s3backer
+  mounter: rclone
+  csi.storage.k8s.io/provisioner-secret-name: csi-s3-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+  csi.storage.k8s.io/controller-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/controller-publish-secret-namespace: kube-system
+  csi.storage.k8s.io/node-stage-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+  csi.storage.k8s.io/node-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-publish-secret-namespace: kube-system
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: csi-s3-s3fs
+provisioner: ch.ctrox.csi.s3-driver
+parameters:
+  # specify which mounter to use
+  # can be set to rclone, s3fs, goofys or s3backer
+  mounter: s3-fs
+  csi.storage.k8s.io/provisioner-secret-name: csi-s3-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+  csi.storage.k8s.io/controller-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/controller-publish-secret-namespace: kube-system
+  csi.storage.k8s.io/node-stage-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+  csi.storage.k8s.io/node-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-publish-secret-namespace: kube-system
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: csi-s3-goofys
+provisioner: ch.ctrox.csi.s3-driver
+parameters:
+  # specify which mounter to use
+  # can be set to rclone, s3fs, goofys or s3backer
+  mounter: goofys
+  csi.storage.k8s.io/provisioner-secret-name: csi-s3-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+  csi.storage.k8s.io/controller-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/controller-publish-secret-namespace: kube-system
+  csi.storage.k8s.io/node-stage-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+  csi.storage.k8s.io/node-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-publish-secret-namespace: kube-system
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: csi-s3-s3backer
+provisioner: ch.ctrox.csi.s3-driver
+parameters:
+  # specify which mounter to use
+  # can be set to rclone, s3fs, goofys or s3backer
+  mounter: s3backer
+  csi.storage.k8s.io/provisioner-secret-name: csi-s3-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+  csi.storage.k8s.io/controller-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/controller-publish-secret-namespace: kube-system
+  csi.storage.k8s.io/node-stage-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+  csi.storage.k8s.io/node-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-publish-secret-namespace: kube-system

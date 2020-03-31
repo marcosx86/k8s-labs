@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: csi-s3-secret
+  namespace: kube-system
+stringData:
+  accessKeyID: warehouse
+  secretAccessKey: masterkey
+  # For AWS set it to "https://s3.<region>.amazonaws.com"
+  endpoint: http://192.168.0.22:9000/
+  # If not on S3, set it to ""
+  region: RegionOne
