@@ -1,0 +1,12 @@
+[submodule "gits/csi-s3"]
+	path = gits/csi-s3
+	url = https://github.com/ctrox/csi-s3.git
+[submodule "gits/kube-state-metrics-configs"]
+	path = gits/kube-state-metrics-configs
+	url = https://github.com/devopscube/kube-state-metrics-configs.git
+[submodule "gits/kubernetes-local-cluster-flannel-metallb-traefik"]
+	path = gits/kubernetes-local-cluster-flannel-metallb-traefik
+	url = https://github.com/Thoorium/kubernetes-local-cluster-flannel-metallb-traefik.git
+[submodule "gits/kubernetes-prometheus"]
+	path = gits/kubernetes-prometheus
+	url = https://github.com/bibinwilson/kubernetes-prometheus.git
