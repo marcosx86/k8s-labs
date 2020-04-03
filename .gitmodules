@@ -10,3 +10,9 @@
 [submodule "gits/kubernetes-prometheus"]
 	path = gits/kubernetes-prometheus
 	url = https://github.com/bibinwilson/kubernetes-prometheus.git
+[submodule "gits/fluentd-kubernetes-daemonset"]
+	path = gits/fluentd-kubernetes-daemonset
+	url = https://github.com/fluent/fluentd-kubernetes-daemonset.git
+[submodule "gits/efk-kubernetes"]
+	path = gits/efk-kubernetes
+	url = https://github.com/mjhea0/efk-kubernetes.git

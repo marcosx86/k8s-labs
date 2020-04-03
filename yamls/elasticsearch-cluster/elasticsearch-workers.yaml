@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-es-worker
+data:
+  elasticsearch.yml: |
+    cluster.name: elastic-cluster
+    cluster.initial_master_nodes: ["elasticsearch-master"]
+    cluster.remote.connect: false
+    network.host: "0.0.0.0"
+    bootstrap.memory_lock: false
+    node.master: false
+    node.ingest: false
+    xpack.security.enabled: false
+    xpack.security.audit.enabled: false
+    xpack.monitoring.enabled: false
+    xpack.ml.enabled: false
+    node.ml: false
+  ES_JAVA_OPTS: -Xms512m -Xmx512m
+---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: elastic-cluster-loadbalancer
+#  labels:
+#    service: elasticsearch-worker
+#spec:
+#  type: NodePort
+#  selector:
+#    service: elasticsearch-worker
+#  ports:
+#  - name: loadbalancer 
+#    port: 9200
+#    targetPort: 9200
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: elastic-cluster-transport
+#  labels:
+#    service: elasticsearch-worker
+#spec:
+#  type: ClusterIP
+#  selector:
+#    service: elasticsearch-worker
+#  ports:
+#  - name: transport
+#    port: 9300
+#    targetPort: 9300
+#---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch-cluster-workers
+spec:
+  serviceName: elasticsearch
+  replicas: 2
+  selector:
+    matchLabels:
+      service: elasticsearch-worker
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        service: elasticsearch-worker
+    spec:
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        command: ["sysctl", "-w", "vm.max_map_count=262144"]
+      containers:
+      - name: elasticsearch-worker
+        resources:
+            requests:
+                memory: 1Gi
+        securityContext:
+          privileged: true
+          runAsUser: 1000
+          capabilities:
+            add:
+            - IPC_LOCK
+            - SYS_RESOURCE
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+        env:
+        - name: ES_JAVA_OPTS
+          valueFrom:
+            configMapKeyRef:
+              name: config-es-worker
+              key: ES_JAVA_OPTS
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /_cluster/health?local=true
+            port: 9200
+          initialDelaySeconds: 5
+        ports:
+        - containerPort: 9200
+          name: es-http
+        - containerPort: 9300
+          name: es-transport
+        volumeMounts:
+        - name: elasticsearch-config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+      volumes:
+        - name: elasticsearch-config
+          configMap:
+            name: config-es-worker
+            items:
+              - key: elasticsearch.yml
+                path: elasticsearch.yml
