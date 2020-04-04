@@ -16,3 +16,6 @@
 [submodule "gits/efk-kubernetes"]
 	path = gits/efk-kubernetes
 	url = https://github.com/mjhea0/efk-kubernetes.git
+[submodule "gits/metrics-server"]
+	path = gits/metrics-server
+	url = https://github.com/kubernetes-incubator/metrics-server.git
