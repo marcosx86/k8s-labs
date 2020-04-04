@@ -33,36 +33,6 @@ spec:
   - name: transport
     port: 9300
     targetPort: 9300
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: elastic-cluster-loadbalancer
-#  labels:
-#    service: elasticsearch-master
-#spec:
-#  type: NodePort
-#  selector:
-#    service: elasticsearch-master
-#  ports:
-#  - name: loadbalancer 
-#    port: 9200
-#    targetPort: 9200
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: elastic-cluster-transport
-#  labels:
-#    service: elasticsearch-master
-#spec:
-#  type: ClusterIP
-#  selector:
-#    service: elasticsearch-master
-#  ports:
-#  - name: transport
-#    port: 9300
-#    targetPort: 9300
 ---
 apiVersion: apps/v1
 kind: StatefulSet
