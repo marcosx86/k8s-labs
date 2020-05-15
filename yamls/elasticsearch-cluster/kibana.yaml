@@ -1,3 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-kibana
+data:
+  kibana.yml: |
+    server:
+      name: kibana
+      host: "0"
+    elasticsearch.hosts: [ "http://elasticsearch-cluster:9200" ]
+    xpack:
+      monitoring.ui.container.elasticsearch.enabled: true
+      spaces.enabled: true
+    logging:
+      timezone: "America/Sao_Paulo"
+      rotate:
+        enabled: true
+        everyBytes: 10485760
+        keepFiles: 5
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,9 +35,6 @@ spec:
       - name: kibana
         image: elastic/kibana:7.6.2
         imagePullPolicy: IfNotPresent
-        env:
-        - name: ELASTICSEARCH_HOSTS
-          value: http://elasticsearch-cluster:9200
         ports:
         - containerPort: 5601
           name: http
@@ -28,6 +45,14 @@ spec:
             path: /api/status
             port: 5601
           initialDelaySeconds: 5
+        volumeMounts:
+        - name: config
+          subPath: kibana.yml
+          mountPath: /usr/share/kibana/config/kibana.yml
+      volumes:
+      - name: config
+        configMap:
+          name: config-kibana
 ---
 apiVersion: v1
 kind: Service

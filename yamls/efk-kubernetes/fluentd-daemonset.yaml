@@ -28,7 +28,7 @@ spec:
         image: fluent/fluentd-kubernetes-daemonset:v1.10.2-debian-elasticsearch7-1.0
         env:
           - name:  FLUENT_ELASTICSEARCH_HOST
-            value: "elasticsearch-cluster.nm-elasticsearch"
+            value: "elasticsearch-cluster.elasticsearch-prod"
           - name:  FLUENT_ELASTICSEARCH_PORT
             value: "9200"
           - name: FLUENT_ELASTICSEARCH_SCHEME
@@ -47,6 +47,9 @@ spec:
         - name: varlibdockercontainers
           mountPath: /var/lib/docker/containers
           readOnly: true
+        - name: varlogjournal
+          mountPath: /var/log/journal
+          readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
       - name: varlog
@@ -55,3 +58,6 @@ spec:
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
+      - name: varlogjournal
+        hostPath:
+          path: /var/log/journal
