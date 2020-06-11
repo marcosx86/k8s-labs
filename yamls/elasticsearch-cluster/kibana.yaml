@@ -44,7 +44,7 @@ spec:
             scheme: HTTP
             path: /api/status
             port: 5601
-          initialDelaySeconds: 5
+          initialDelaySeconds: 30
         volumeMounts:
         - name: config
           subPath: kibana.yml
@@ -67,3 +67,4 @@ spec:
   ports:
   - port: 5601
     targetPort: 5601
+    nodePort: 30561
