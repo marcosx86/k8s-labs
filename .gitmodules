@@ -19,3 +19,6 @@
 [submodule "gits/metrics-server"]
 	path = gits/metrics-server
 	url = https://github.com/kubernetes-incubator/metrics-server.git
+[submodule "gits/Thakurvaibhav_k8s"]
+	path = gits/Thakurvaibhav_k8s
+	url = https://github.com/Thakurvaibhav/k8s
