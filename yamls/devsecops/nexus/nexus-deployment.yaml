@@ -25,6 +25,12 @@ spec:
             - name: http
               containerPort: 8081
               protocol: TCP
+            - name: docker-proxy
+              containerPort: 8082
+              protocol: TCP
+            - name: docker-private
+              containerPort: 8083
+              protocol: TCP
           volumeMounts:
             - name: vol-nexus-data
               mountPath: /nexus-data

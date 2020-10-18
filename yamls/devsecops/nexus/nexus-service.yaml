@@ -13,8 +13,12 @@ spec:
     port: 80
     protocol: TCP
     targetPort: 8081
-  - name: docker
+  - name: docker-proxy
     port: 3000
     protocol: TCP
-    targetPort: 3000
+    targetPort: 8082
+  - name: docker-private
+    port: 3001
+    protocol: TCP
+    targetPort: 8083
   type: LoadBalancer
