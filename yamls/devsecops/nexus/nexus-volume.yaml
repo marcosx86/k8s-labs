@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-nexus-data
+  namespace: nm-nexus
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+  glusterfs:
+    endpoints: glusterfs-cluster
+    endpointsNamespace: default
+    path: /volume1
+    readOnly: false

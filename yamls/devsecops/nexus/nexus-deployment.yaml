@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+  namespace: nm-nexus
+  labels:
+    app: repository
+spec:
+  selector:
+    matchLabels:
+      app: repository
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: repository
+    spec:
+      containers:
+        - name: nexus
+          image: sonatype/nexus3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          volumeMounts:
+            - name: vol-nexus-data
+              mountPath: /nexus-data
+          resources:
+            requests:
+              memory: 2500Mi
+              cpu: 2000m
+            limits:
+              memory: 3000Mi
+              cpu: 4000m
+          readinessProbe:
+            initialDelaySeconds: 45
+            periodSeconds: 3
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8081
+              scheme: HTTP
+          livenessProbe:
+            initialDelaySeconds: 90
+            httpGet:
+              path: /
+              port: 8081
+              scheme: HTTP
+          securityContext:
+            runAsUser: 1000
+      volumes:
+        - name: vol-nexus-data
+          persistentVolumeClaim:
+            claimName: gfs-nexus-data
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: node-has
+                    operator: NotIn
+                    values:
+                      - jenkins-slaves
+
