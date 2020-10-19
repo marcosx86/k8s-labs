@@ -21,12 +21,12 @@ spec:
           name: http
           protocol: TCP
         resources:
-          limits:
-            cpu: 250m
-            memory: 384Mi
           requests:
             cpu: 250m
             memory: 384Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
 
 ---
 apiVersion: v1
@@ -36,10 +36,9 @@ metadata:
   labels:
     app: lmenezes-cerebro
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: lmenezes-cerebro
   ports:
-  - port: 9000
+  - port: 80
     targetPort: 9000
-    nodePort: 30900

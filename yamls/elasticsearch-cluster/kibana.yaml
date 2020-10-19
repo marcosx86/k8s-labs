@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: config-kibana
+  name: kibana-yaml
 data:
   kibana.yml: |
     server:
@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: kibana
-        image: elastic/kibana:7.6.2
+        image: docker.elastic.co/kibana/kibana:7.9.2
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5601
@@ -52,7 +52,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: config-kibana
+          name: kibana-yaml
 ---
 apiVersion: v1
 kind: Service
@@ -61,10 +61,9 @@ metadata:
   labels:
     service: kibana
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     run: kibana
   ports:
-  - port: 5601
+  - port: 80
     targetPort: 5601
-    nodePort: 30561
