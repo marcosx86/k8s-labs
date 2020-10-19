@@ -14,6 +14,7 @@ data:
     xpack.monitoring.enabled: false
     xpack.ml.enabled: false
     node.ml: false
+    indices.lifecycle.history_index_enabled: false
   ES_JAVA_OPTS: -Xms512m -Xmx512m
 ---
 apiVersion: v1
