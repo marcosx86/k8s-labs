@@ -1,0 +1,30 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: traefik
+  namespace: nm-traefik
+  annotations: {}
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+  - protocol: TCP
+    port: 80
+    name: web
+  - protocol: TCP
+    port: 443
+    name: websecure
+  type: LoadBalancer
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: traefik-dashboard
+  namespace: nm-traefik
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+  - port: 8080
+    name: dashboard
+  type: NodePort
