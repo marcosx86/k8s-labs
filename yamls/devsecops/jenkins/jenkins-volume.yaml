@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gfs-jenkins-home
+  namespace: nm-jenkins
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+  glusterfs:
+    endpoints: glusterfs-cluster
+    endpointsNamespace: default
+    path: /jenkins-home
+    readOnly: false

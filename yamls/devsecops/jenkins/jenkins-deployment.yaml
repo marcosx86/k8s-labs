@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: nm-jenkins
+  labels:
+    app: pipeline
+spec:
+  selector:
+    matchLabels:
+      app: pipeline
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: pipeline
+    spec:
+      initContainers:
+        - name: init-sysctl
+          image: 'busybox:1.27.2'
+          command: ['chown', '1000:1000', '/var/jenkins_home']
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            procMount: Default
+          volumeMounts:
+            - name: vol-jenkins-home
+              mountPath: /var/jenkins_home
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: agent
+              containerPort: 50000
+              protocol: TCP
+          volumeMounts:
+            - name: vol-jenkins-home
+              mountPath: /var/jenkins_home
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 2000Mi
+              cpu: 2000m
+          readinessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 3
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+          livenessProbe:
+            initialDelaySeconds: 60
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+      volumes:
+        - name: vol-jenkins-home
+          persistentVolumeClaim:
+            claimName: gfs-jenkins-home
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: node-has
+                    operator: NotIn
+                    values:
+                      - jenkins-slaves
+
