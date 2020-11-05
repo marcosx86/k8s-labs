@@ -13,5 +13,5 @@ spec:
   glusterfs:
     endpoints: glusterfs-cluster
     endpointsNamespace: default
-    path: /volume1
+    path: /nexus-data
     readOnly: false

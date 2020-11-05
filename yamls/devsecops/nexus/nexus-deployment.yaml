@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: nexus
-          image: sonatype/nexus3
+          image: sonatype/nexus3:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
