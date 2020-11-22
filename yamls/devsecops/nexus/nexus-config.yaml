@@ -1,0 +1,73 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nexus-config-files
+  namespace: nm-nexus
+data:
+  karaf-system.properties: |
+    ${optionals} = custom.system.properties
+    org.ops4j.pax.logging.DefaultServiceLog.level = ERROR
+    karaf.name = root
+    karaf.default.repository = system
+    karaf.shell.init.script = shell.init.script,scripts/*.script
+    karaf.clean.all = false
+    karaf.clean.cache = true
+    karaf.local.user = karaf
+    karaf.local.roles = admin,manager,viewer,systembundles
+    xml.catalog.files =
+    org.apache.servicemix.specs.debug = false
+    org.apache.servicemix.specs.timeout = 0
+    org.apache.karaf.specs.debug = false
+    org.apache.karaf.specs.timeout = 0
+    org.apache.aries.proxy.weaving.enabled = none
+    org.apache.aries.proxy.weaving.disabled = org.objectweb.asm.*,org.slf4j.*,org.apache.log4j.*,javax.*,org.apache.xerces.*
+    karaf.secured.services = (&(osgi.command.scope=*)(osgi.command.function=*))
+    karaf.history=${user.home}/.nexus/karaf41.history
+    java.awt.headless=true
+    networkaddress.cache.ttl=3600
+    com.sun.jndi.ldap.connect.pool.protocol=plain ssl
+    javax.xml.bind.JAXBContext=com.sun.xml.bind.v2.ContextFactory
+    org.ops4j.pax.logging.StaticLogbackContext=true
+    org.ops4j.pax.logging.StaticLogbackFile=${logback.etc}/logback.xml
+    org.jboss.logging.provider=slf4j
+    memory.chunk.size=268435456
+    profiler.memoryCheckInterval=3600000
+    distributed.checkIntegrityLastTxs=0
+    index.cursor.prefetchSize=10000
+    distributed.shutdownTimeout=20000
+    storage.diskCache.diskFreeSpaceLimit=128
+    org.jline.reader.support.parsedline=true
+  nexus.vmoptions: |
+    -Xms256M
+    -Xmx1024M
+    -XX:MaxDirectMemorySize=1024M
+    -XX:+UnlockDiagnosticVMOptions
+    -XX:+LogVMOutput
+    -XX:LogFile=../sonatype-work/nexus3/log/jvm.log
+    -XX:-OmitStackTraceInFastThrow
+    -Djava.net.preferIPv4Stack=true
+    -Dkaraf.home=.
+    -Dkaraf.base=.
+    -Dkaraf.etc=etc/karaf
+    -Djava.util.logging.config.file=etc/karaf/java.util.logging.properties
+    -Dkaraf.data=../sonatype-work/nexus3
+    -Dkaraf.log=../sonatype-work/nexus3/log
+    -Djava.io.tmpdir=../sonatype-work/nexus3/tmp
+    -Dkaraf.startLocalConsole=false
+    -Djava.endorsed.dirs=lib/endorsed
+  elasticsearch.yml: |
+    cluster.name: nexus
+    path:
+      home: ${karaf.base}
+      conf: ${fabric.etc}
+      data: ${karaf.data}/elasticsearch
+      logs: ${karaf.data}/log
+      work: ${java.io.tmpdir}/elasticsearch
+    node.data: true
+    node.master: true
+    node.local: true
+    http.enabled: false
+    script.groovy.sandbox.enabled: false
+    discovery.zen.ping.multicast.enabled: false
+    search.default_search_timeout: 5m
+

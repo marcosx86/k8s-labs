@@ -20,37 +20,26 @@ spec:
           persistentVolumeClaim:
             claimName: gfs-sonarqube-data
       initContainers:
-        - name: init-sysctl
-          image: 'busybox:1.27.2'
-          command:
-            - sysctl
-            - '-w'
-            - vm.max_map_count=262144
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: IfNotPresent
-          securityContext:
-            privileged: true
-            procMount: Default
         - name: fix-volume-permission
           image: busybox
-          command:
-            - sh
-            - '-c'
-            - 'chown -v 999:999 /opt/sonarqube/data'
-          resources: {}
+          imagePullPolicy: Always
+          command: ['sh', '-c', 'chown -v 999:999 /opt/sonarqube/data']
+          securityContext:
+            privileged: true
           volumeMounts:
             - name: nfsvol
               mountPath: /opt/sonarqube/data
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: Always
+        - name: init-sysctl
+          image: 'busybox:1.27.2'
+          imagePullPolicy: IfNotPresent
+          command: ['sysctl', '-w', 'vm.max_map_count=262144']
           securityContext:
             privileged: true
+            procMount: Default
       containers:
         - name: sonarqube
           image: '10.10.67.210/sonatype/sonarqube:7.9.5-openjdk-11'
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 9000
@@ -98,15 +87,5 @@ spec:
             periodSeconds: 5
             successThreshold: 1
             failureThreshold: 3
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: IfNotPresent
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      securityContext: {}
-      imagePullSecrets:
-        - name: registrynexus
-      schedulerName: default-scheduler
   strategy:
     type: Recreate
