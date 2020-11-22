@@ -50,31 +50,26 @@ spec:
               memory: 2000Mi
               cpu: 2000m
           readinessProbe:
-            initialDelaySeconds: 30
-            periodSeconds: 3
-            failureThreshold: 10
             httpGet:
               path: /
               port: 8080
               scheme: HTTP
+            initialDelaySeconds: 45
+            timeoutSeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
           livenessProbe:
-            initialDelaySeconds: 60
             httpGet:
               path: /
               port: 8080
               scheme: HTTP
+            initialDelaySeconds: 90
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
       volumes:
         - name: vol-jenkins-home
           persistentVolumeClaim:
             claimName: gfs-jenkins-home
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 1
-              preference:
-                matchExpressions:
-                  - key: node-has
-                    operator: NotIn
-                    values:
-                      - jenkins-slaves
-
