@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: gfs-sonarqube-data
+  namespace: nm-sonarqube
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: gfs-sonarqube-data
+  volumeMode: Filesystem

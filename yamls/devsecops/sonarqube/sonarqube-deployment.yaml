@@ -1,0 +1,112 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: sonarqube
+  namespace: nm-sonarqube
+  labels:
+    app: sonarqube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      volumes:
+        - name: nfsvol
+          persistentVolumeClaim:
+            claimName: gfs-sonarqube-data
+      initContainers:
+        - name: init-sysctl
+          image: 'busybox:1.27.2'
+          command:
+            - sysctl
+            - '-w'
+            - vm.max_map_count=262144
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            procMount: Default
+        - name: fix-volume-permission
+          image: busybox
+          command:
+            - sh
+            - '-c'
+            - 'chown -v 999:999 /opt/sonarqube/data'
+          resources: {}
+          volumeMounts:
+            - name: nfsvol
+              mountPath: /opt/sonarqube/data
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+      containers:
+        - name: sonarqube
+          image: '10.10.67.210/sonatype/sonarqube:7.9.5-openjdk-11'
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          env:
+            - name: SONARQUBE_JDBC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-postgres-credentials
+                  key: username
+            - name: SONARQUBE_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-postgres-credentials
+                  key: password
+            - name: SONARQUBE_JDBC_URL
+              value: 'jdbc:postgresql://postgresql.nm-postgres:5432/sonarqube'
+          resources:
+            limits:
+              cpu: '4'
+              memory: 3Gi
+            requests:
+              cpu: '2'
+              memory: 2Gi
+          volumeMounts:
+            - name: nfsvol
+              mountPath: /opt/sonarqube/data
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 4
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 90
+            timeoutSeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      imagePullSecrets:
+        - name: registrynexus
+      schedulerName: default-scheduler
+  strategy:
+    type: Recreate

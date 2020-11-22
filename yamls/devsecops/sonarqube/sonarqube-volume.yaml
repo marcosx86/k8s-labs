@@ -1,0 +1,15 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: gfs-sonarqube-data
+spec:
+  capacity:
+    storage: 1Gi
+  glusterfs:
+    endpoints: glusterfs-cluster
+    path: /sonarqube-data
+    endpointsNamespace: default
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
