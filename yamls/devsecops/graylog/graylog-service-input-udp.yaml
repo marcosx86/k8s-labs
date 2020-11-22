@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: graylog-input-udp
+  namespace: nm-graylog
+spec:
+  ports:
+  - name: gelf-udp
+    port: 12201
+    protocol: UDP
+    targetPort: 12201
+  - name: syslog-udp
+    port: 1514
+    protocol: UDP
+    targetPort: 1514
+  selector:
+    app: graylog
+  type: ClusterIP

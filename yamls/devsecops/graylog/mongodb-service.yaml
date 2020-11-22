@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mongodb
+  namespace: nm-graylog
+spec:
+  ports:
+    - name: mongodb
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+  selector:
+    app: mongodb
+  type: NodePort
