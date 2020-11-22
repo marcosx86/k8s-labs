@@ -1,0 +1,5 @@
+registry=http://10.10.67.203/repository/npm-proxy/
+always-auth=true
+_auth="bnBtOm5wbQ=="
+audit=false
+
