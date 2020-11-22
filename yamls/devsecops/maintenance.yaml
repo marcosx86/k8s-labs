@@ -1,0 +1,21 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: debian
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: maintenance
+  template:
+    metadata:
+      labels:
+        service: maintenance
+    spec:
+      containers:
+      - name: debian-slim
+        image: debian:buster-slim
+        command: [ "sleep" ]
+        args: [ "infinity" ]
+        imagePullPolicy: IfNotPresent
