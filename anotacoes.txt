@@ -1,0 +1,160 @@
+i======================================================================
+=== Docker
+
+#!/bin/bash
+apt-get remove --purge -y docker docker-engine docker.io containerd runc
+apt-get update
+apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+apt-get update
+mkdir -p /etc/docker
+cat > /etc/docker/daemon.json << EOF
+{
+	"bip": "172.31.0.1/16"
+}
+EOF
+apt-get install -y docker-ce docker-ce-cli containerd.io
+usermod -aG docker marcos
+docker run hello-world
+
+======================================================================
+=== Docker logrotate
+
+/var/log/pods/*/*.log {
+    rotate 60
+    daily
+    copytruncate
+    missingok
+    notifempty
+    compress
+    maxsize 50M
+    dateext
+    dateformat -%Y%m%d-%s
+    create 0644 root root
+}
+
+/var/lib/docker/containers/*/*.log {
+    rotate 60
+    daily
+    copytruncate
+    missingok
+    notifempty
+    compress
+    maxsize 500M
+    dateext
+    dateformat -%Y%m%d-%s
+    create 0644 root root
+}
+
+======================================================================
+=== Kubernetes
+
+#!/bin/bash
+apt install -y arptables ebtables
+update-alternatives --set iptables /usr/sbin/iptables-legacy
+update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+update-alternatives --set arptables /usr/sbin/arptables-legacy
+update-alternatives --set ebtables /usr/sbin/ebtables-legacy
+cat > /etc/docker/daemon.json << EOF
+{
+	"bip": "172.31.0.1/16",
+	"exec-opts": ["native.cgroupdriver=systemd"],
+	"log-driver": "json-file",
+	"log-opts": {
+		"max-size": "100m"
+	},
+	"storage-driver": "overlay2"
+}
+EOF
+mkdir -p /etc/systemd/system/docker.service.d
+systemctl daemon-reload
+systemctl restart docker
+cat <<EOF | tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system
+apt-get update && sudo apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+apt-get update
+apt-get install -y kubelet kubeadm kubectl
+apt-mark hold kubelet kubeadm kubectl
+
+======================================================================
+=== Kubernetes post-init
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+source <(kubeadm completion bash)
+source <(kubectl completion bash)
+
+======================================================================
+=== Glusterfs
+
+#!/bin/bash
+apt install -y gnupg2
+wget -O - https://download.gluster.org/pub/gluster/glusterfs/7/rsa.pub | apt-key add -
+DEBID=$(grep 'VERSION_ID=' /etc/os-release | cut -d '=' -f 2 | tr -d '"')
+DEBVER=$(grep 'VERSION=' /etc/os-release | grep -Eo '[a-z]+')
+DEBARCH=$(dpkg --print-architecture)
+echo deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/${DEBID}/${DEBARCH}/apt ${DEBVER} main > /etc/apt/sources.list.d/gluster.list
+apt update
+apt install -y glusterfs-server
+systemctl enable glusterd.service
+systemctl start glusterd.service
+
+cat << EOF >> /etc/hosts
+
+10.10.67.87 deb-gluster1.tjba.local deb-gluster1
+10.10.67.88 deb-gluster2.tjba.local deb-gluster2
+10.10.67.89 deb-gluster3.tjba.local deb-gluster3
+EOF
+
+/debian-vg/root -L6G
+resize2fs /dev/debian-vg/root
+cfdisk /dev/sdb
+pvcreate /dev/sdb1
+vgextend debian-vg /dev/sdb1
+lvcreate debian-vg -n databrick -L5G
+mkfs.xfs -i size=512 /dev/debian-vg/databrick
+
+mkdir -p /srv/gluster/databrick
+echo '/dev/debian-vg/databrick /srv/gluster/databrick xfs defaults 1 2' >> /etc/fstab
+mount -a
+
+gluster volume create volume1 deb-gluster1.tjba.local:/srv/gluster/databrick/volume1 deb-gluster2.tjba.local:/srv/gluster/databrick/volume1 deb-gluster3.tjba.local:/srv/gluster/databrick/volume1
+
+======================================================================
+=== Nexus / Docker config
+
+"insecure-registries": ["10.10.67.76:3000", "10.10.67.76:3001"]
+
+admin / adminNexus
+{"auths": {"10.10.67.76:3000": {"auth": "YWRtaW46YWRtaW5OZXh1cw=="},"10.10.67.76:3001": {"auth": "YWRtaW46YWRtaW5OZXh1cw=="}}}
+eyJhdXRocyI6IHsiMTAuMTAuNjcuNzY6MzAwMCI6IHsiYXV0aCI6ICJZV1J0YVc0NllXUnRhVzVPWlhoMWN3PT0ifSwiMTAuMTAuNjcuNzY6MzAwMSI6IHsiYXV0aCI6ICJZV1J0YVc0NllXUnRhVzVPWlhoMWN3PT0ifX19Cg==
+
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: nexus-docker-registry
+  namespace: default
+data:
+  .dockerconfigjson: eyJhdXRocyI6IHsiMTAuMTAuNjcuNzY6MzAwMCI6IHsiYXV0aCI6ICJZV1J0YVc0NllXUnRhVzVPWlhoMWN3PT0ifSwiMTAuMTAuNjcuNzY6MzAwMSI6IHsiYXV0aCI6ICJZV1J0YVc0NllXUnRhVzVPWlhoMWN3PT0ifX19Cg==
+kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "nexus-docker-registry"}]}'
+
+======================================================================
+=== Helm
+
+curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
+sudo apt-get install apt-transport-https --yes
+echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+sudo apt-get update
+sudo apt-get install helm
+
