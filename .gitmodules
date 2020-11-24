@@ -22,3 +22,12 @@
 [submodule "gits/Thakurvaibhav_k8s"]
 	path = gits/Thakurvaibhav_k8s
 	url = https://github.com/Thakurvaibhav/k8s
+[submodule "gits/rook_rook"]
+	path = gits/rook_rook
+	url = https://github.com/rook/rook.git
+[submodule "gits/kubernetes-sigs_metrics-server"]
+	path = gits/kubernetes-sigs_metrics-server
+	url = https://github.com/kubernetes-sigs/metrics-server.git
+[submodule "gits/kubernetes_autoscaler"]
+	path = gits/kubernetes_autoscaler
+	url = https://github.com/kubernetes/autoscaler.git
