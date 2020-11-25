@@ -1,0 +1,15 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: gfs-shared-dynamic
+spec:
+  capacity:
+    storage: 1Gi
+  glusterfs:
+    endpoints: glusterfs-cluster
+    path: /shared-dynamic
+    endpointsNamespace: default
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem

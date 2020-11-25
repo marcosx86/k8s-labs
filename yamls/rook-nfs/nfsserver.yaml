@@ -1,0 +1,28 @@
+apiVersion: nfs.rook.io/v1alpha1
+kind: NFSServer
+metadata:
+  name: nfsserver-gfs-shared
+  namespace: rook-nfs
+spec:
+  replicas: 1
+  exports:
+  - name: share1
+    server:
+      accessMode: ReadWrite
+      squash: "none"
+    persistentVolumeClaim:
+      claimName: gfs-shared-claim
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: rook-nfs-gfs-share1
+  labels:
+    app: rook-nfs
+parameters:
+  exportName: share1
+  nfsServerName: nfsserver-gfs-shared
+  nfsServerNamespace: rook-nfs
+provisioner: nfs.rook.io/nfsserver-gfs-shared-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
