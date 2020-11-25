@@ -1,0 +1,16 @@
+---
+- hosts: cluster2
+  remote_user: marcos
+  become: true
+  become_method: sudo
+  tasks:
+    - name: shutdown kubelet
+      service:
+        name: kubelet
+        state: stopped
+    - name: shutdown docker
+      service:
+        name: docker
+        state: stopped
+    - name: reboot
+      shell: shutdown -r -t now
