@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-2
+spec:
+  serviceName: test-nginx-rook-nfs
+  selector:
+    matchLabels:
+      app: nginx-2
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: nginx-2
+    spec:
+      initContainers:
+        - name: init-www
+          image: busybox
+          imagePullPolicy: Always
+          command: ["/bin/sh"]
+          args: ["-c", "chmod 777 /usr/share/nginx/html"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: www2
+              mountPath: /usr/share/nginx/html
+      containers:
+        - name: nginx
+          image: nginx:stable
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: www2
+              mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+    - metadata:
+        name: www2
+        labels:
+          app: test-nginx
+      spec:
+        storageClassName: sc-nfs-test
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
