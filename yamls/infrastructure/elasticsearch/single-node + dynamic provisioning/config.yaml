@@ -1,0 +1,23 @@
+---
+--- Cluster ElasticSearch - Configuração dos nós master
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastic-cluster-config
+  namespace: nm-elasticsearch
+  labels:
+    component: elasticsearch
+    role: allinone
+data:
+  ES_JAVA_OPTS: '-Xms2048m -Xmx2048m -Xlog:disable'
+  elasticsearch.yml: |
+    #bootstrap.memory_lock: true
+    cluster.name: "es-cluster"
+    network.host: 0.0.0.0
+    discovery.zen.minimum_master_nodes: 1
+    discovery.seed_hosts: ["elasticsearch"]
+    cluster.initial_master_nodes:
+      - elastic-cluster-0
+    node.roles: [master,data,ingest]
+    xpack.ml.enabled: false
