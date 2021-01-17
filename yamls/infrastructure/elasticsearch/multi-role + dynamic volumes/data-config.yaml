@@ -1,0 +1,22 @@
+---
+--- Cluster ElasticSearch - Configuração dos nós de dados
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastic-data-config
+  namespace: nm-elasticsearch
+  labels:
+    component: elasticsearch
+    role: data
+data:
+  ES_JAVA_OPTS: '-Xms2048m -Xmx2048m -Xlog:disable'
+  elasticsearch.yml: |
+    #bootstrap.memory_lock: true
+    cluster.name: "es-cluster"
+    network.host: 0.0.0.0
+    discovery.zen.minimum_master_nodes: 2
+    discovery.seed_hosts: ["elasticsearch-discovery"]
+    node.roles: [data]
+    indices.memory.index_buffer_size: 25%
+    xpack.ml.enabled: false

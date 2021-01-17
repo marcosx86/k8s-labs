@@ -1,0 +1,7 @@
+---
+--- Cluster ElasticSearch - Namespace "nm-elasticsearch"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nm-elasticsearch

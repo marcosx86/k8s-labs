@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: nm-elasticsearch
+  labels:
+    component: elasticsearch
+    role: client
+    version: '7.9.3'
+spec:
+  ports:
+  - name: http
+    port: 9200
+    targetPort: 9200
+    protocol: TCP
+  selector:
+    component: elasticsearch
+    role: client
+    version: '7.9.3'
+  type: LoadBalancer

@@ -1,0 +1,21 @@
+---
+--- Cluster ElasticSearch - Configuração dos nó coordenador
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastic-coordinator-config
+  namespace: nm-elasticsearch
+  labels:
+    component: elasticsearch
+    role: coordinator
+data:
+  ES_JAVA_OPTS: '-Xms512m -Xmx512m -Xlog:disable'
+  elasticsearch.yml: |
+    #bootstrap.memory_lock: true
+    cluster.name: "es-cluster"
+    network.host: 0.0.0.0
+    discovery.zen.minimum_master_nodes: 2
+    discovery.seed_hosts: ["elasticsearch-discovery"]
+    node.roles: []
+    xpack.ml.enabled: false
