@@ -1,0 +1,15 @@
+- name: Update packages
+  apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: Installs htop, python2+pip, python3+pip
+  apt: 
+    pkg:
+      - htop
+      - python-minimal
+      - python-pip
+      - python3-minimal
+      - python3-pip
+    state: latest
+

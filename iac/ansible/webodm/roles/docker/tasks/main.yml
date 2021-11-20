@@ -46,3 +46,11 @@
     state: started
     enabled: yes
 
+#- name: Give group permission to common user
+#  user:
+#    name: "{{ remote_user }}"
+#    groups: docker
+#    append: yes
+
+#- name: Test Docker
+#  shell: docker run hello-world

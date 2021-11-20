@@ -1,0 +1,13 @@
+all:
+  hosts:
+  children:
+    aws_vms:
+      hosts:
+        1.1.1.1:
+      vars:
+        remote_user: admin
+    vagrant_vms:
+      hosts:
+        192.168.56.105:
+      vars:
+        remote_user: vagrant
