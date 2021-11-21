@@ -3,10 +3,10 @@ all:
   children:
     aws_vms:
       hosts:
-        34.228.232.127:
+        34.235.170.81:
       vars:
         remote_user: admin
-        extra_device: /dev/nvme1n1
+        extra_device: /dev/xvdb
     vagrant_vms:
       hosts:
         192.168.56.105:

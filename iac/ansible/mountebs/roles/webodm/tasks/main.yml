@@ -1,0 +1,113 @@
+- name: Pull webodm_webapp image
+  docker_image:
+    name: opendronemap/webodm_webapp
+    source: pull
+ 
+- name: Pull webodm_db image
+  docker_image:
+    name: opendronemap/webodm_db
+    source: pull
+ 
+- name: Pull nodeodm image
+  docker_image:
+    name: opendronemap/nodeodm
+    source: pull
+ 
+- name: Pull redis image
+  docker_image:
+    name: redis
+    source: pull
+
+- name: Setup docker network
+  docker_network:
+    name: net_webodm
+
+- name: Create database volume
+  docker_volume:
+    name: voldatabase
+
+- name: Create webapp volume
+  docker_volume:
+    name: volmedia
+
+- name: Start redis container
+  docker_container:
+    name: odm_broker
+    image: redis
+    restart: yes
+    restart_policy: unless-stopped
+    oom_killer: true
+    oom_score_adj: -500
+    ports:
+      - 6379:6379
+    networks:
+      - name: net_webodm
+
+- name: Start database container
+  docker_container:
+    name: odm_database
+    image: opendronemap/webodm_db
+    restart: yes
+    restart_policy: unless-stopped
+    oom_killer: true
+    oom_score_adj: -100
+    volumes:
+      - voldatabase:/var/lib/postgres/data:Z
+    ports:
+      - 5432:5432
+    networks:
+      - name: net_webodm
+
+- name: Start webapp container
+  docker_container:
+    name: odm_webapp
+    image: opendronemap/webodm_webapp
+    command: /bin/bash -c "chmod +x /webodm/*.sh && /bin/bash -c \"/webodm/wait-for-postgres.sh odm_database /webodm/wait-for-it.sh -t 0 odm_broker:6379 -- /webodm/start.sh\""
+    restart: yes
+    restart_policy: unless-stopped
+    oom_score_adj: 0
+    env:
+      WO_DEFAULT_NODES: "0"
+      WO_BROKER: "redis://odm_broker"
+      WO_DATABASE_HOST: "odm_database"
+    volumes:
+      - volmedia:/webodm/app/media:z
+    ports:
+      - 8000:8000
+    networks:
+      - name: net_webodm
+        links:
+          - odm_broker
+          - odm_database:db
+          - odm_worker:worker
+
+- name: Start worker container
+  docker_container:
+    name: odm_worker
+    image: opendronemap/webodm_webapp
+    command: /bin/bash -c "/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 odm_broker:6379 -- /webodm/wait-for-it.sh -t 0 odm_webapp:8000 -- /webodm/worker.sh start"
+    restart: yes
+    restart_policy: unless-stopped
+    oom_score_adj: 250
+    env:
+      WO_BROKER: "redis://odm_broker"
+    volumes:
+      - volmedia:/webodm/app/media:z
+    networks:
+      - name: net_webodm
+        links:
+          - odm_webapp
+          - odm_broker
+          - odm_database:db
+
+- name: Start nodeodm container
+  docker_container:
+    name: odm_nodeodm
+    image: opendronemap/nodeodm
+    restart: yes
+    restart_policy: unless-stopped
+    oom_score_adj: 500
+    ports:
+      - 3000:3000
+    networks:
+      - name: net_webodm

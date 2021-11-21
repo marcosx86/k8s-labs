@@ -1,0 +1,17 @@
+- name: Update packages
+  apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: Installs htop
+  apt: 
+    pkg:
+      - htop
+      - parted
+      - lvm2
+      #- python-minimal
+      #- python-pip
+      #- python3-minimal
+      #- python3-pip
+    state: latest
+

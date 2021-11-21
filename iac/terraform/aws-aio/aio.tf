@@ -17,7 +17,7 @@ resource "aws_key_pair" "cluster_key" {
 
 resource "aws_security_group" "aio-sg" {
 
-    name        = format("%s-webodm-sg", var.project_name)
+    name        = format("%s-sg", var.project_name)
 
     vpc_id      = aws_vpc.cluster_vpc.id
 
@@ -29,8 +29,15 @@ resource "aws_security_group" "aio-sg" {
     }
 
     ingress {
-        from_port   = "8080"
-        to_port     = "8080"
+        from_port   = "3000"
+        to_port     = "3000"
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port   = "8000"
+        to_port     = "8000"
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
@@ -66,7 +73,7 @@ resource "aws_security_group" "aio-sg" {
     }
 
     tags = merge(var.tags, { 
-        Name = format("%s-aio-sg", var.project_name)
+        Name = format("%s-sg", var.project_name)
     })
 
 
@@ -77,7 +84,7 @@ resource "aws_security_group" "aio-sg" {
 resource "aws_instance" "webodm" {
 
     ami = var.ami
-    instance_type = var.first_instance_type
+    instance_type = var.instance_type
     availability_zone = "us-east-1a"
 
     subnet_id = aws_subnet.public_subnet_a.id
@@ -113,7 +120,7 @@ resource "aws_ebs_volume" "webodm-data" {
 
 resource "aws_volume_attachment" "ebs_att" {
 
-    device_name = "/dev/sdh"
+    device_name = "/dev/xvdb"
     volume_id   = aws_ebs_volume.webodm-data.id
     instance_id = aws_instance.webodm.id
 
@@ -167,7 +174,7 @@ resource "aws_route_table_association" "public_subnet_cluster_1a_association" {
 # Customize the Cluster Name
 variable "project_name" {
     description = "Cluster Name"
-    default     = "webodm"
+    default     = "webodm-aio"
 }
 
 variable "ami" {
@@ -184,7 +191,7 @@ variable "aws_region" {
 # Customize your key path
 variable "aws_key_path" {
     description = "key_path"
-    default     = "aio.pub"
+    default     = "key-aio.pub"
 }
 
 # Tags
@@ -196,7 +203,7 @@ variable "tags" {
 }
 
 #
-variable "first_instance_type" {
+variable "instance_type" {
     description = "VM instance type"
     default     = "t2.nano"
 }

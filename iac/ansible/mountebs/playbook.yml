@@ -1,5 +1,5 @@
 ---
-- name: Setup WebODM
+- name: Setup LVM
   hosts: all
   remote_user: "{{ remote_user }}"
   become: yes
@@ -7,8 +7,5 @@
 
   roles:
     - common
-    - docker
-    - docker_lvm
-    - webodm_preflight
-    - webodm
+    - mountebs
   

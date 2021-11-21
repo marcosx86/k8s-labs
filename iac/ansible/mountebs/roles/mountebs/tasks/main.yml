@@ -1,0 +1,31 @@
+- name: Create a new LVM primary partition
+  parted:
+    device: /dev/sdb
+    label: gpt
+    part_type: primary
+    number: 1
+    state: present
+
+- name: Create a volume group on top of /dev/sdb1
+  lvg:
+    vg: docker-vg
+    pvs: /dev/sdb1
+
+- name: Create a logical volume on top of docker-vg
+  lvol:
+    vg: docker-vg
+    lv: docker
+    size: 100%FREE
+    shrink: no
+
+- name: Create a ext4 filesystem on LV debian
+  community.general.filesystem:
+    fstype: ext4
+    dev: /dev/docker-vg/docker
+
+- name: Mounts LV docker to /var/lib/docker
+  mount:
+    src: /dev/docker-vg/docker
+    path: /var/lib/docker
+    state: mounted
+    fstype: ext4

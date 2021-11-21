@@ -1,0 +1,23 @@
+- name: Update Alternatives to Python2
+  shell: update-alternatives --install /usr/local/bin/python python /usr/bin/python2 20
+
+- name: Update Alternatives to PIP2
+  shell: update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip2 20
+
+- name: Install python-backports.ssl-match-hostname
+  apt:
+    name: python-backports.ssl-match-hostname
+    state: latest
+
+- name: Install python modules docker and requests
+  pip:
+    name:
+      - docker==4.4.4
+      - requests>=2.20.1
+
+- name: Update Alternatives to Python3
+  shell: update-alternatives --install /usr/local/bin/python python /usr/bin/python3 40
+
+- name: Update Alternatives to PIP3
+  shell: update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 40
+
