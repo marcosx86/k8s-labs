@@ -1,0 +1,135 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: istio-envoys
+  namespace: default
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: app, operator: Exists}
+      - {key: version, operator: Exists}
+  podMetricsEndpoints:
+  - port: http-envoy-prom
+    path: /stats/prometheus
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: istio-envoys
+  namespace: istio-system
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: app, operator: Exists}
+      - {key: version, operator: Exists}
+  podMetricsEndpoints:
+  - port: http-envoy-prom
+    path: /stats/prometheus
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: istio-envoys
+  namespace: monitoring-system
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: app, operator: Exists}
+      - {key: version, operator: Exists}
+  podMetricsEndpoints:
+  - port: http-envoy-prom
+    path: /stats/prometheus
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: istio-envoys
+  namespace: kubernetes-dashboard
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: app, operator: Exists}
+      - {key: version, operator: Exists}
+  podMetricsEndpoints:
+  - port: http-envoy-prom
+    path: /stats/prometheus
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: istiod
+  namespace: istio-system
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: istio, operator: In, values: ['pilot']}
+  podMetricsEndpoints:
+  - port: http-prometheus
+    path: /metrics
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: istio-ingress
+  namespace: istio-system
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: istio, operator: In, values: ['ingress']}
+  podMetricsEndpoints:
+  - port: http-prometheus
+    path: /stats/prometheus
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: jaeger
+  namespace: istio-system
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: app, operator: In, values: ['jaeger']}
+  podMetricsEndpoints:
+  - port: http-prometheus
+    path: /metrics
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kiali
+  namespace: istio-system
+  labels:
+    release: kps
+spec:
+  selector:
+    matchExpressions:
+      - {key: app, operator: In, values: ['kiali']}
+  podMetricsEndpoints:
+  - port: http-metrics
+    path: /stats/prometheus
+    interval: 15s
+  - port: http-envoy-prom
+    path: /stats/prometheus
+    interval: 15s
