@@ -268,3 +268,9 @@ helm repo add external-dns https://kubernetes-sigs.githu^Cio/external-dns/
 helm install --set provider=pdns --set extraArgs[0]=--pdns-server=http://192.168.88.55:8081 --set extraArgs[1]=--pdns-api-key=superapikeyforauthoritative --set domainFilters[0]=local --set sources[0]=service --set sources[1]=ingress --set sources[2]=istio-virtualservice --set sources[3]=istio-gateway --set policy=sync -n kube-system external-dns external-dns/external-dns --atomic --wait
 
 
+======================================================================
+=== PowerDNS (Docker VM)
+
+docker run -d --name powerdns-auth46 -e PDNS_AUTH_API_KEY=superapikeyforauthoritative -p 1053:53 -p 1053:53/udp -p 8081:8081 powerdns/pdns-auth-46:4.6.2
+docker run -d --name powerdns-admin -e SECRET_KEY='a-very-secret-key' -e OFFLINE_MODE=False -v pda-data:/data -p 9191:80 ngoduykhanh/powerdns-admin:0.2.4
+
