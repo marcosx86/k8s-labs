@@ -1,4 +1,4 @@
-i======================================================================
+======================================================================
 === Docker
 
 #!/bin/bash
@@ -157,4 +157,114 @@ sudo apt-get install apt-transport-https --yes
 echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
 sudo apt-get update
 sudo apt-get install helm
+
+======================================================================
+=== Helm 3
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+./get_helm.sh -v v3.8.2
+
+======================================================================
+=== Metal LB
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+
++ config
+
+======================================================================
+=== Kubernetes Dashboard
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
+kubectl apply -f https://raw.githubusercontent.com/marcosx86/k8s-labs/master/yamls/kubernetes-dashboard/kubernetes-dashboard-admin.yaml
+kubectl describe -n kubernetes-dashboard secret $(kubectl get secrets -n kubernetes-dashboard | grep admin-user | awk '{print $1}')
+
+======================================================================
+=== Basic Charts
+
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana-charts https://grafana.github.io/helm-charts
+
+helm install -n kube-system --set hostNetwork.enabled=true --set args[0]="--kubelet-insecure-tls" metrics-server metrics-server/metrics-server --atomic --wait
+helm install kps prometheus-community/kube-prometheus-stack --create-namespace -n monitoring-system --version 32.2.1 --set grafana.adminPassword=123mudar --wait --atomic
+
+======================================================================
+=== Istio
+
+curl -L https://istio.io/downloadIstio | sh -
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.13.4 TARGET_ARCH=x86_64 sh -
+
+helm repo add istio https://istio-release.storage.googleapis.com/charts
+
+helm install --version 1.13.4 istio-base istio/base --create-namespace -n istio-system --wait --atomic
+helm install --version 1.13.4 istiod istio/istiod -n istio-system --wait --atomic
+helm install --version 1.13.4 istio-ingress istio/gateway -n istio-system --wait --atomic
+
+Grafana Dashboards Dashboards
+
+7639 Istio Mesh Dashboard
+7636 Istio Service Dashboard
+7630 Istio Workload Dashboard
+11829 Istio Performance Dashboard
+7645 Istio Control Plane Dashboard
+
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.13/samples/addons/jaeger.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.13/samples/addons/prometheus.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.13/samples/addons/grafana.yaml
+
+======================================================================
+=== Kiali
+
+helm repo add kiali https://kiali.org/helm-charts
+helm install --version 1.49.0 --set cr.create=true --set cr.namespace=istio-system --namespace kiali-operator --create-namespace kiali-operator kiali/kiali-operator --wait --atomic
+
+======================================================================
+=== Kiali Config
+
+kubectl edit -n istio-system kialis.kiali.io kiali
+
+---
+spec:
+  deployment:
+    accessible_namespaces:
+    - '**'
+    logger:
+      log_level: debug
+  external_services:
+    grafana:
+      auth:
+        type: basic
+        username: admin
+        password: 123mudar
+      in_cluster_url: http://kps-grafana.monitoring-system
+      url: http://grafana.local
+    istio:
+      component_status:
+        components:
+        - app_label: istiod
+          is_core: true
+          is_proxy: false
+          namespace: ""
+        - app_label: istio-ingress
+          is_core: true
+          is_proxy: true
+          namespace: ""
+        enabled: true
+    prometheus:
+      url: http://prometheus-operated.monitoring-system:9090
+    tracing:
+      in_cluster_url: http://tracing.istio-system:16685/jaeger
+      url: http://jaeger.local
+      whitelist_istio_system:
+      - jaeger-query
+      - istio-ingress
+
+======================================================================
+=== ExternalDNS + PowerDNS
+
+helm repo add external-dns https://kubernetes-sigs.githu^Cio/external-dns/
+helm install --set provider=pdns --set extraArgs[0]=--pdns-server=http://192.168.88.55:8081 --set extraArgs[1]=--pdns-api-key=superapikeyforauthoritative --set domainFilters[0]=local --set sources[0]=service --set sources[1]=ingress --set sources[2]=istio-virtualservice --set sources[3]=istio-gateway --set policy=sync -n kube-system external-dns external-dns/external-dns --atomic --wait
+
 
