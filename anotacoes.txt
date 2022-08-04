@@ -274,3 +274,8 @@ helm install --set provider=pdns --set extraArgs[0]=--pdns-server=http://192.168
 docker run -d --name powerdns-auth46 -e PDNS_AUTH_API_KEY=superapikeyforauthoritative -p 1053:53 -p 1053:53/udp -p 8081:8081 powerdns/pdns-auth-46:4.6.2
 docker run -d --name powerdns-admin -e SECRET_KEY='a-very-secret-key' -e OFFLINE_MODE=False -v pda-data:/data -p 9191:80 ngoduykhanh/powerdns-admin:0.2.4
 
+======================================================================
+=== AWX (formely Ansible Tower)
+
+helm repo add awx-operator https://ansible.github.io/awx-operator/
+helm install -n awx --create-namespace awx-operator awx-operator/awx-operator

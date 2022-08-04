@@ -1,0 +1,19 @@
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx-single
+  namespace: awx
+spec:
+  admin_user: admin
+  auto_upgrade: true
+  create_preload_data: true
+  image_pull_policy: IfNotPresent
+  loadbalancer_port: 80
+  loadbalancer_protocol: http
+  nodeport_port: 33333
+  postgres_storage_requirements:
+    requests:
+      storage: 1Gi
+  postgres_storage_class: local-storage
+  projects_persistence: false
+  service_type: LoadBalancer
