@@ -31,3 +31,7 @@
 [submodule "gits/kubernetes_autoscaler"]
 	path = gits/kubernetes_autoscaler
 	url = https://github.com/kubernetes/autoscaler.git
+[submodule "gits/terraform-aws-eks"]
+	path = gits/terraform-aws-eks
+	url = https://github.com/terraform-aws-modules/terraform-aws-eks.git
+	branch = v18.31.2

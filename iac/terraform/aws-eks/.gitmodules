@@ -1,0 +1,4 @@
+[submodule "terraform-aws-eks"]
+	path = terraform-aws-eks
+	url = https://github.com/terraform-aws-modules/terraform-aws-eks.git
+	branch = v18.31.2
